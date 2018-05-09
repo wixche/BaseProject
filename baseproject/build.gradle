@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.fly803'
+group = 'com.github.fly803'
 
 def ext = rootProject.ext
 def config = rootProject.ext.android // 配置
@@ -15,6 +15,7 @@ android {
         versionCode config.versionCode
         versionName config.versionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
     packagingOptions {
 //        exclude 'META-INF/NOTICE' // will not include NOTICE file
@@ -47,10 +48,13 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    implementation 'com.android.support:support-v4:27.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.0'
     testImplementation 'junit:junit:4.12'
     implementation support.multidex
     implementation support.supportAppcompatV7
-    
+    implementation support.design
+
     //Rx家族
     implementation ext.rxAndroid
     implementation ext.rxJava
@@ -63,6 +67,11 @@ dependencies {
     implementation ext.okhttp
     implementation ext.okhttpLoggingInterceptor
     implementation ext.volley
+    //项目基础库
+    implementation ext.fragmentation
+    implementation ext.fragmentationSwipeback
+    implementation ext.butterknife
+    annotationProcessor ext.butterknifeCompiler
     //Converter
     implementation ext.retrofitConverterGson
     implementation ext.retrofitAdapter
@@ -76,4 +85,6 @@ dependencies {
     implementation ext.easyPermissions
     implementation ext.fastjson
     implementation ext.jjwt
+    //UI
+    implementation ext.shapeLoadingView
 }

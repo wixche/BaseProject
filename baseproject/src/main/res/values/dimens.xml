@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<!-- Default screen margins, per the Android Design guidelines. -->
+    <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="xxxvalues">1dp</dimen>
     <dimen name="xxxXdpi">@dimen/px10</dimen>
     <dimen name="xxxYdpi">@dimen/px10</dimen>
@@ -46,6 +46,7 @@
 	/*4k电视分辨率*/
 	3840x2160 UHD3840×2160 (16:9)主流
 	4096×2160 4K Ultra HD4096×2160 (256:135 大约17:9)
+	部分厂家（夏普，索尼）出了8k电视，分辨率：7680x4320 
 	非主流分辨率，需要单独适配dimens
     -->
     <dimen name="px1">0.33dp</dimen>
@@ -1428,4 +1429,5 @@
     <dimen name="sp298">99.33dp</dimen>
     <dimen name="sp299">99.67dp</dimen>
     <dimen name="sp300">100.0dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>
