@@ -38,6 +38,8 @@ public class BaseResponse<T> {
      */
     public int dataType;
 
+    public String msg;
+
     public int getCode() {
         return code;
     }
@@ -52,6 +54,14 @@ public class BaseResponse<T> {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 
     public T getData() {
@@ -76,7 +86,18 @@ public class BaseResponse<T> {
                 "data=" + data +
                 ", code=" + code +
                 ", message='" + message + '\'' +
+                ", msg='" + msg + '\'' +
                 ", dataType=" + dataType +
                 '}';
+    }
+    
+    public String getNewJsonStrin(){
+        return "{" +
+                "data=" + data +
+                ", code=" + code +
+                ", message='" + message + '\'' +
+                ", msg='" + msg + '\'' +
+                ", dataType=" + dataType +
+                '}'; 
     }
 }

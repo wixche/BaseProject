@@ -132,6 +132,23 @@ public class FileUtils {
         return size;
     }
 
+    public static File saveBitmapFile(Context context,String dirName, String fileName, Bitmap bitmap) {
+        File file = new File(createFileDir(context,dirName), fileName);
+        if (bitmap == null) {
+            return null;
+        }
+        try {
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+    
     /**
      * 保存Bitmap到指定目录
      *
@@ -1145,5 +1162,44 @@ public class FileUtils {
      */
     public static boolean isExistSDCard() {
         return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+    }
+
+
+    /**
+     * 删除目录下所有文件
+     * @param Path    路径
+     */
+    public static void deleteAllFile(String Path) {
+
+        // 删除目录下所有文件
+        File path = new File(Path);
+        File files[] = path.listFiles();
+        if (files != null) {
+            for (File tfi : files) {
+                if (tfi.isDirectory()) {
+                    System.out.println(tfi.getName());
+                }
+                else {
+                    tfi.delete();
+                }
+            }
+        }
+    }
+
+    /**
+     * 删除方法, 这里只会删除某个文件夹下的文件，如果传入的directory是个文件，将不做处理
+     * @param directory
+     * @return void
+     */
+    public static void deleteFilesByDirectory(File directory) {
+        if (directory != null && directory.exists() && directory.isDirectory()) {
+            for (File file : directory.listFiles()) {
+                if(file.isDirectory())
+                    deleteFilesByDirectory(file);
+                file.delete();
+            }
+        }else{
+            Log.i("", "This directory is file, not execute delete");
+        }
     }
 }

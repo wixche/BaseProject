@@ -1,13 +1,15 @@
 package com.cg.baseproject.request.retrofit.subscriber;
 
 import android.content.Context;
-import android.widget.Toast;
+
+import com.cg.baseproject.configs.BaseProjectConfig;
 import com.cg.baseproject.interfaces.SubscriberOnNextListener;
-import com.cg.baseproject.request.exception.ApiException;
-import com.cg.baseproject.request.exception.ExceptionHandle;
+import com.cg.baseproject.request.exception.ExceptionEngine;
 import com.cg.baseproject.request.retrofit.progress.ProgressCancelListener;
-import com.cg.baseproject.request.retrofit.progress.ProgressDialogHandler;
+import com.cg.baseproject.view.loading.CommonLoading;
 import com.orhanobut.logger.Logger;
+import com.shashank.sony.fancytoastlib.FancyToast;
+
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
@@ -24,27 +26,25 @@ public class ProgressSubscriber<T> implements ProgressCancelListener, Observer<T
      */
   private Disposable mDisposable;
   private SubscriberOnNextListener mSubscriberOnNextListener;
-  private ProgressDialogHandler mProgressDialogHandler;
+//  private ProgressDialogHandler mProgressDialogHandler;
   private Context context;
+  private CommonLoading mCommonLoading;
 
   public ProgressSubscriber(SubscriberOnNextListener mSubscriberOnNextListener, Context context) {
     this.mSubscriberOnNextListener = mSubscriberOnNextListener;
     this.context = context;
-    mProgressDialogHandler = new ProgressDialogHandler(context, this, true);
+    mCommonLoading = new CommonLoading(context, BaseProjectConfig.loadingMessage);
   }
 
   private void showProgressDialog() {
-    if (mProgressDialogHandler != null) {
-      mProgressDialogHandler.obtainMessage(ProgressDialogHandler.SHOW_PROGRESS_DIALOG)
-          .sendToTarget();
+    if (mCommonLoading != null) {
+        mCommonLoading.showLoading();
     }
   }
 
   private void dismissProgressDialog() {
-    if (mProgressDialogHandler != null) {
-      mProgressDialogHandler.obtainMessage(ProgressDialogHandler.DISMISS_PROGRESS_DIALOG)
-          .sendToTarget();
-      mProgressDialogHandler = null;
+    if (mCommonLoading != null) {
+      mCommonLoading.closeLoading();
     }
   }
 
@@ -54,9 +54,8 @@ public class ProgressSubscriber<T> implements ProgressCancelListener, Observer<T
    * 当发送了onError事件之后,发送者onError之后的事件依旧会继续发送,但是接收者当接收到onError之后就会停止接收事件了.
    */
   @Override public void onError(Throwable e) {
-      Toast.makeText(context,
-              "ProgressSubscriber onError" + ExceptionHandle.handleException(e).message,
-              Toast.LENGTH_SHORT).show();
+      FancyToast.makeText(context,"返回值错误ProgressSubscriber onError:" + ExceptionEngine.handleException(e).getMessage(), 
+              FancyToast.LENGTH_LONG,FancyToast.ERROR,false).show();
     dismissProgressDialog();
   }
 

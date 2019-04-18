@@ -1,5 +1,10 @@
 package com.cg.baseproject.utils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 /**
  * @Description:主要功能: 类型转换类
  * @Prject: CommonUtilLibrary
@@ -364,6 +369,125 @@ public class ConvertUtils {
 
         }
         return str;
+    }
+
+    /**
+     * byte[] 转为 对象
+     *
+     * @param bytes
+     * @return
+     */
+    public static Object byteToObject(byte[] bytes) throws Exception {
+        ObjectInputStream ois = null;
+        try {
+            ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+            return ois.readObject();
+        } finally {
+            if (ois != null) ois.close();
+        }
+    }
+
+    /**
+     * 对象 转为 byte[]
+     *
+     * @param obj
+     * @return
+     */
+    public static byte[] objectToByte(Object obj) throws Exception {
+        ObjectOutputStream oos = null;
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            oos.writeObject(obj);
+            return bos.toByteArray();
+        } finally {
+            if (oos != null) oos.close();
+        }
+    }
+
+    public static void byteToBit(byte[] bytes, StringBuilder sb) {
+        for (int i = 0; i < Byte.SIZE * bytes.length; i++)
+            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
+    }
+
+    public static String byteToBit(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < Byte.SIZE * bytes.length; i++)
+            sb.append((bytes[i / Byte.SIZE] << i % Byte.SIZE & 0x80) == 0 ? '0' : '1');
+        return sb.toString();
+    }
+
+    public static int convertToint(String intStr, int defValue) {
+        try {
+            return Integer.parseInt(intStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return defValue;
+    }
+
+    public static long convertTolong(String longStr, long defValue) {
+        try {
+            return Long.parseLong(longStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return defValue;
+    }
+
+    public static float convertTofloat(String fStr, float defValue) {
+        try {
+            return Float.parseFloat(fStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return defValue;
+    }
+
+    public static double convertTodouble(String dStr, double defValue) {
+        try {
+            return Double.parseDouble(dStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return defValue;
+    }
+
+
+    public static Integer convertToInteger(String intStr) {
+        try {
+            return Integer.parseInt(intStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Long convertToLong(String longStr) {
+        try {
+            return Long.parseLong(longStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Float convertToFloat(String fStr) {
+        try {
+            return Float.parseFloat(fStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Double convertToDouble(String dStr) {
+        try {
+            return Double.parseDouble(dStr);
+        } catch (NumberFormatException e) {
+            //e.printStackTrace();
+        }
+        return null;
     }
 
 }

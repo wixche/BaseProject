@@ -2,6 +2,7 @@ README
 ===========================
 # BaseProject
 Android项目基础库，包含四大部分：一、分辨率适配 二、网络请求框架Retrofit2封装 
+For the English readme：## [English](https://github.com/fly803/BaseProject/blob/master/README_EN.md) |
 三、Android基类封装和项目常用Utils方法 四、基于RxJava、RxAndroid的事件总线RxBus。
 1.Android分辨率适配方案，解决大家的分辨率适配烦恼，可以直接依据设计图写尺寸，不做额外的操作，简单方便准确。
 2.封装Retrofit2，统一了异常处理，对网络错误，网络错误，连接失败，证书验证失败进行了统一封装，无需用户
@@ -36,51 +37,88 @@ Android项目基础库，包含四大部分：一、分辨率适配 二、网络
 
 ## 一、屏幕分辨率适配
 ### 分辨率适配概述
+采用了2种屏幕适配方式，用户可以自己的需要进行选择。1、头条屏幕适配方式；2、Dimens适配方式
+#### 1、头条屏幕适配方案
+#### 基本原理
+方案的原理其实很简单，首先我们要明白一点，无论我们在xml中使用何种尺寸单位（dp、sp、pt……）,最后在绘制时都会给我们转成px!知道这点后，剩下的容易了，我们选定一种尺寸单位
+（dp、sp、pt ……）作为我们的适配单位，然后篡改这个单位与px之间的转化比例，然后在xml中使用选定的单位做适配！就是这么简单。我这里是采用自定义的px，和sp，这样更灵活。方便切换
+不同适配方案的时候，不用改动任何的布局代码。今日头条屏幕适配方案的核心原理在于，根据以下公式算出 density 当前设备屏幕总宽度（单位为像素）/ 设计图总宽度（单位为 dp) = density
+density 的意思就是 1 dp 占当前设备多少像素。在屏幕适配中，我们一般只对宽度适配，毕竟高度可以滑动解决！而且高度值，标准屏，虚拟键、全面屏等五花八门，手机的宽高比许多厂家也不一样。
+这个方案的思路，主旨是通过修改density值，强行把所有不同尺寸分辨率的手机的宽度dp值改成一个统一的值，这样就解决了所有的适配问题。比如，设计稿宽度是360px，那么开发这边就会把
+目标dp值设为360dp，在不同的设备中，动态修改density值，从而保证(手机像素宽度)px/density这个值始终是360dp,这样的话，就能保证UI在不同的设备上表现一致了。
+该方案有如下几点优势：
+###### a、侵入性很低，而且也没有涉及私有API 
+###### b、今日头条的大厂在用，稳定性有保证的 
+###### c、不会有任何性能的损耗 
+###### d、使用成本低，使用该方案后在页面布局时不需要额外的代码和操作
+###### e、可适配三方库的控件和系统的控件(不止是 Activity 和 Fragment，Dialog、Toast 等所有系统控件都可以适配)，由于修改的 density 在整个项目中是全局的，所以只要一次修改，项目中的所有地方都会受益。
+如果是新项目采用基本没有缺点。
+
+#### 项目引入方法。
+###### 1.引导页Activity继承BaseScreenAdaptActivity，重新相关方法
+@Override
+    protected void initScreenAdaption() {
+        if (ScreenUtils.isPortrait()) {
+            ScreenUtils.adaptScreen4VerticalSlide(this, AppConfig.widthInPx);
+        } else {
+            ScreenUtils.adaptScreen4HorizontalSlide(this, AppConfig.heightInPx);
+        }
+    }
+###### 2.AppConfig里面配置widthInPx，heightInPx为相应的效果图像素宽度值，如果横屏就是高度值
+###### 3.布局中使用方法。拿到效果图，不需要额外计算，布局直接抄设计图上的尺寸。你说爽不爽。布局文件里面的xml使用方式同屏幕适配的第二种适配方法，请在后面查看。
+
+
+#### 2、Dimens屏幕适配方案
 该方案参考的了Android适配领域做得比较好的方案，如郭霖，Stormzhang，鸿洋和凯子的方案，可以说综合了各家之所长。
 以最小的代价，实现最好的适配效果。我们都希望分辨率适配是这样。拿到效果图，不需要额外计算，布局直接抄设计图上的尺寸。
 我的适配方案就可以达到这样的效果，你说爽不爽。
 
 #### 基本原理
 App在运行的时候，会在Res下读取对应的dimens文件，BaseProject已经在Res里面对主流的手机的常用分辨率建立的所有的对应关系，
-无需用户额外操作，就可以完美适配主流手机。亲测可以适配市面主流手机的95%，即使默认不能适配的手机，也可以通过本文的工具进行适配（ResolutionTools.png）。用户如果想适配其他分辨率，也提供了相应的获取方法。
+无需用户额外操作，就可以完美适配主流手机。亲测可以适配市面主流手机的95%，即使默认不能适配的手机，也可以通过本文的工具进行适配（ResolutionTools.jar）。用户如果想适配其他分辨率，也提供了相应的获取方法。
 介于低于1280x720的低端手机已经很少，所有960x640,480x320等低分辨率手机没有提供默认支持，如需支持，请手动添加。
 
 #### 默认支持的分辨率：
  分辨率 | 分辨率描述
  ---  | ---
-| 1184 x 720   | 带虚拟键1280x720手机实际dimens夹
 | 1280 x 720   | 无虚拟键1280x702手机
+| 1184 x 720   | 带虚拟键1280x720手机实际dimens夹
+|    xhdpi     | 手机密度为xhdpi的其他型号手机
+| 1920 x 1080  | 无虚拟键盘1920x1280手机，常见型号小米，OPPO，vivo，联想，中兴，魅族等手机
 | 1776 x 1080  | 带虚拟键盘1920x1280手机，常见型号Google nexus5
 | 1794 x 1080  | 带虚拟键盘1920x1280手机，常见型号oppo，vivio华为等手机型号
 | 1812 x 1080  | 带虚拟键盘1920x1280手机，常见型号小米，华为等手机型号
-| 1920 x 1080  | 无虚拟键盘1920x1280手机，常见型号小米，OPPO，vivo，联想，中兴，魅族等手机
+| 2220 x 1080  | 渲染分辨率为2220x1080，物理分辨率2960x1440，常见型号三星S8(可以在设计里面进行分辨率的设置）
 | 2280 x 1080  | 常见型号华为p20，屏幕比例19:9
-| 2076 x 1080  | 物理分辨率2950x1440，渲染分辨率实际dimens文件夹，常见型号三星S8
-| 2392 x 1440  | 带虚拟键盘2560x1440手机，常见型号Google pixsel系列
+|    xxhdpi    | 手机密度为xxhdpi的其他型号手机
 | 2560 x 1440  | 无虚拟键盘2560x1440手机，常见型号小米，OPPO，vivo，联想，中兴，魅族等手机
+| 2392 x 1440  | 带虚拟键盘2560x1440手机，常见型号Google pixsel系列
 | 2712 x 1440  | 密度3.5，分辨率2560x1440手机，常见型号Google nexus6等
 | 2792 x 1440  | 常见型号三星S8+等，dimens实际文件夹
 | 2960 x 1440  | 常见型号三星s9等，dimens实际文件夹 长宽比18.5:9
+|    xxxhdpi   | 手机密度为xxxhdpi的其他型号手机
 
 
 ### 集成分辨率适配
 #### 使用概述 
 有两种集成分辨率适配的方式。
-###### 1.通过Gradle集成BaseProject。集成BaseProject，就对默认分辨率都进行了支持。
-###### 其他分辨率通过doc/工具集/分配率适配dimens工具.jar手动添加，如图所示：
+#### 1.下载demo工程，doc-res文件夹下载values全部拷贝到自己的工程。
+#### 其他分辨率通过doc/工具集/分配率适配dimens工具.jar手动添加，如图所示：
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/ResolutionTools.png) 
 ##### 加需要额外支持的dimens拷贝到自己的工程res下,注意输入的名字是values+xxxdpi+分辨率的形式，如values-xhdpi-960x640
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/dimens.png) 
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/project_res.png) 
-###### 分辨率适配工具下载地址：
+#### 分辨率适配工具下载地址：
 https://github.com/fly803/BaseProject/blob/master/doc/Tools/ResolutionAdaption.jar
 
-###### 2.通过BaseProject提供的工具手动集成，利用工具生成dimens，将所有的dimens和相应的文件夹拷贝到自己工程的res文件夹
-###### 分辨率适配工具下载地址：
+#### 2.通过BaseProject提供的工具手动集成，利用工具生成dimens，将所有的dimens和相应的文件夹拷贝到自己工程的res文件夹
+#### 分辨率适配工具下载地址：
 https://github.com/fly803/BaseProject/blob/master/doc/Tools/ResolutionAdaption.jar
 
 
-###### 项目中具体使用方法：
+
+
+## 布局中的具体使用方法，2种适配方法，布局layout写法一致：
 拿到效果图:
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/Mark.png) 
 
@@ -91,11 +129,11 @@ https://github.com/fly803/BaseProject/blob/master/doc/Tools/ResolutionAdaption.j
 ##### 布局文库应该这么写：
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/mark_layout.png) 
 
-##### 来张组合图，直接根据效果图输入相应的尺寸，只是写法上，如果是1px，改成px1就可以了，感受一下：
+##### 来张组合图，直接根据效果图输入相应的尺寸，只是写法上，如果是1px，改成px1就可以了，字体如果是1sp，改成sp1就可以了，感受一下：
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/mark_compare.jpg) 
 ##### 感受完了，想一想，按照这种方式去写布局你说爽不爽。
 
-##### 首先说一下：这个px并不代表px1像素，我在内部会进行dp处理，转成相应手机对应的尺寸。这就是本库适配的原理。
+##### 首先说一下：这个px1并不代表写死1px像素，我在内部会进行dp处理，转成相应手机对应的尺寸。字体单位sp1也在内部进行相应的到安卓sp的转换。这就是本库适配的原理。
 
 ##### 接下来：看下不同手机，不同分辨率下的效果：
 三星S7 分辨率:2560x1440
@@ -248,30 +286,56 @@ APIWrapper.getInstance().login("username", "password")
     });
   }
 
+支持自定义服务器状态码和消息值，修改Demo里面的AppApplication的getServerReturnCodeMap方法
+        map.put(101, "消息101");
+        map.put(102, "消息102");
+        map.put(103, "消息101");
+        map.put(104, "消息102");
+        map.put(105, "消息101");
+        map.put(106, "消息102");
+        map.put(999, "不明原因999");
+        填入自己服务器返回的自定义状态码和消息值
+        
+支持自定义多个BaseURl值，修改Demo里面的AppApplication的getBaseURLMap方法
+                 map.put("douban", "https://api.douban.com/");
+                 map.put("gank", "https://gank.io/");
 ```
 所以整个逻辑是这样的： 
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/RetrofitExceptionHandle.png) 
 请求接口和数据解析都可能出错，所以在这两层进行错误处理。为了更好的解耦，我们通过拦截器拦截错误，然后根据错误类型分发信息。
 
 ###  2.集成Retrofit封装使用方法
-BaseProject测试工程app工程中的api文件夹拷贝到自己的工程目录下，包含四个文件：
+BaseProject测试工程app工程中的api文件夹拷贝到自己的工程目录下，包含两个文件，AppConfig和RequestApiInterface,另外2个文件已经废弃：
 ![log](https://raw.githubusercontent.com/fly803/BaseProject/master/doc/GitHubPictures/api.png) 
-
-在AppConfig里面进行相应的baseurl的设置。
 在RequestApiInterface进行相应的接口设置。
-UrlConstants用来拼接接口字符串。
+拷贝APPApplication到自己的工程目录进行相应的设置
+ /**
+     * 初始化BaseProject
+     * @param application 应用的application
+     * @param isLeakCanary 是否集成内存检测库LeakCanary
+     * @param isCrashHandel 是否集成全局Crash监控
+     * @param isNetRequestInterceptorOpen 是否打印网络请求log
+     * @param isBaseURLInterceptorOpen 是否开启BaseURL过滤器
+     * @param isHeaderInterceptorOpen 是否开启请求头过滤器
+     * @param stackview 栈结构分析样式
+     * @param baseurl 网络请求baseurl
+     * @param successcode 网络请求成功code，例如200
+     * @param tag 打印log的tag
+     * @param loadingmessage 数据加载loading的显示语
+     * @param serverReturnCodeMap 应用工程自定义的API异常
+     * @param baseURLMap 应用工程自己的多个BaseURL
+     */
 
 进行如上操作好，就可以调用相应的接口了，调用方式如下所示。
 ```Java
- RequestBusiness.getInstance()
-.toSubscribe(RequestBusiness.getInstance().getAPI().demoRxJava2("220.181.90.8"),
-        new ProgressSubscriber<BaseResponse<IpResult>>(new SubscriberOnNextListener<IpResult>() {
-            @Override
-            public void onNext(IpResult ipResult) {
-                Log.d(AppConfig.TAG, "!!!onNext: "+ipResult.getCity());
-                Snackbar.make(mRecyclerView, "postRequest:" + ipResult.getCity(), Snackbar.LENGTH_SHORT).show();
-            }
-        }, this));
+ RequestBusiness.getInstance().toSubscribe(RequestBusiness.getInstance().getAPI().rxGet("220.181.90.8"), 
+                 new ProgressSubscriber<BaseResponse<IpResult>>(new SubscriberOnNextListener<IpResult>() {
+             @Override
+             public void onNext(IpResult ipResult) {
+                 Log.d(AppConfig.TAG, "!!!onNext: " + ipResult.getCity());
+                 Snackbar.make(mRvDataIndex, "callTypePost:" + ipResult.getCity(), Snackbar.LENGTH_SHORT).show();
+             }
+         }, this));
 ```
 由于统一对异常和错误进行了封装，所以只写onNext方法就可以了。
 
@@ -539,10 +603,11 @@ allprojects {
 
 ##### 在APP的build.gradle dependencies节点下加入
 
-implementation 'com.github.fly803:BaseProject:v+相应的版本号：例如v1.0'
+implementation 'com.github.fly803:BaseProject:相应的版本号：例如1.0.0'
+配置仓库，添加mavenCentral() maven { url 'https://jitpack.io' }
 
-###### 当前可以下载版本
-implementation 'com.github.fly803:BaseProject:v1.0'
+#### 当前可以下载版本
+implementation 'com.github.fly803:BaseProject:1.0.0',已release里面的最新release为准
 
 #### 2.clone项目到本地，将BaseProject库直接依赖到项目。
 
@@ -562,6 +627,14 @@ compile(name: 'BaseProject-release', ext: 'aar')
 项目地址：https://github.com/fly803/BaseProject
 集成过程出现问题可联系本人QQ：356576318(注明来自github)
 ****
+
+
+## [English](https://github.com/fly803/BaseProject/blob/master/README_EN.md) | 中文
+
+#### 友情链接
+[github/UCodeUStory/S-MVP](https://github.com/UCodeUStory/S-MVP) 
+
+[github/UCodeUStory/GradlePluginDevelop](https://https://github.com/UCodeUStory/GradlePluginDevelop)  
 
 ## License
 

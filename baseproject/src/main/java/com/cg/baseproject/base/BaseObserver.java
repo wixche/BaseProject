@@ -6,20 +6,11 @@ package com.cg.baseproject.base;
  * @date 2018/3/18
  */
 
-import android.accounts.NetworkErrorException;
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.util.Log;
-
 import com.cg.baseproject.BaseApplication;
 import com.cg.baseproject.request.exception.ERROR;
-import com.cg.baseproject.request.exception.ExceptionHandle;
-import com.cg.baseproject.utils.NetworkUtils;
-import com.cg.baseproject.utils.ToastUtils;
-
-import java.net.ConnectException;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeoutException;
+import com.cg.baseproject.deprecated.DeprecatedExceptionHandle;
+import com.cg.baseproject.utils.android.NetworkUtils;
+import com.cg.baseproject.utils.android.ToastUtils;
 
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -60,10 +51,10 @@ public abstract class BaseObserver<T> implements Observer<BaseObserver<T>> {
         //        Log.w(TAG, "onError: ", );这里可以打印错误信息  
         onRequestEnd();
         try {
-            if(e instanceof ExceptionHandle.ResponeThrowable){
-                onError((ExceptionHandle.ResponeThrowable)e);
+            if(e instanceof DeprecatedExceptionHandle.ResponeThrowable){
+                onError((DeprecatedExceptionHandle.ResponeThrowable)e);
             } else {
-                onError(new ExceptionHandle.ResponeThrowable(e, ERROR.UNKNOWN));
+                onError(new DeprecatedExceptionHandle.ResponeThrowable(e, ERROR.UNKNOWN));
             }
         } catch (Exception e1) {
             e1.printStackTrace();
